@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run MS1 (Remote DB)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main_db:app",
+                "--port", "8000"
+            ],
+            "env": {
+                // 1. 基础连接信息 (根据队友给的值填入)
+                "GCP_PROJECT_ID": "upheld-booking-475003-p1",
+                "CATALOG_DB_HOST": "104.198.31.98",
+                "CATALOG_DB_PORT": "3306",
+                "CATALOG_DB_USER": "admin",
+                "CATALOG_DB_NAME": "user_profile_db",
+
+                // 2. 密码配置 (二选一)
+                // 方案 A (推荐): 使用 Secret Manager (队友说名字格式是 user-db-*)
+                // 我们猜它是 "user-db-password"，如果报错说找不到，就问队友具体名字
+                "DB_PASSWORD_SECRET": "user-db-password"
+
+                // 方案 B (备用): 如果 Secret 报错，就把上面那行删了，用下面这行直接填密码
+                // "CATALOG_DB_PASSWORD": "StrongPassw0rd!" 
+            },
+            "jinja": true
+        }
+    ]
+}

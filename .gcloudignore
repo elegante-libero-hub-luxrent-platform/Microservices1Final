@@ -1,0 +1,86 @@
+# This file specifies files that are NOT included in the source code
+# uploaded to Cloud Run via `gcloud run deploy`
+
+# .gcloudignore files:
+.gcloudignore
+# If you would like to exclude files, add them here:
+# - node_modules/
+# - .git/
+# - .gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Local testing
+*.db
+*.sqlite
+sqlite.db
+
+# Docker (not needed in Cloud Run)
+docker-compose.yml
+docker-compose.yaml
+Dockerfile.dev
+.dockerignore
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+README.md
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

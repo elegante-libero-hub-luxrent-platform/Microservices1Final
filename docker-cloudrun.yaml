@@ -1,0 +1,34 @@
+# Docker Compose for Cloud Run Development
+# This file is used to test the API locally with external database configuration
+# (simulating Cloud Run environment where database is managed separately)
+
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: ms1-api-cloudrun
+    ports:
+      - "8000:8000"
+    environment:
+      # Point to external database (adjust these values)
+      DB_HOST: ${DB_HOST:-host.docker.internal}
+      DB_USER: ${DB_USER:-ms1_user}
+      DB_PASSWORD: ${DB_PASSWORD:-password123}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-ms1_db}
+      USE_SQLITE: "false"
+      FASTAPIPORT: "8000"
+      SQL_ECHO: "false"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+# Network for inter-service communication
+networks:
+  default:
+    name: ms1-network

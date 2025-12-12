@@ -1,0 +1,28 @@
+annotated-types==0.7.0
+anyio==4.10.0
+click==8.2.1
+dnspython==2.7.0
+email-validator==2.3.0
+fastapi==0.116.1
+h11==0.16.0
+idna==3.10
+pydantic==2.11.7
+pydantic_core==2.33.2
+sniffio==1.3.1
+starlette==0.47.3
+typing-inspection==0.4.1
+typing_extensions==4.15.0
+uvicorn==0.35.0
+sqlalchemy==2.0.36
+pymysql==1.1.0
+python-dotenv==1.0.1
+cryptography==43.0.0
+
+# Google Cloud dependencies (for Secret Manager and Cloud SQL)
+google-cloud-secret-manager==2.20.0
+
+# Auth / OAuth2 / JWT
+authlib==1.3.1
+python-jose[cryptography]==3.3.0
+itsdangerous>=2.1.0
+httpx

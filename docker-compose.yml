@@ -1,0 +1,52 @@
+# Docker Compose configuration for local development/testing
+# Usage: docker-compose up
+
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: ms1-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ms1_db
+      MYSQL_USER: ms1_user
+      MYSQL_PASSWORD: password123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # User & Profile Service API
+  ms1-api:
+    build: .
+    container_name: ms1-api
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ms1_user
+      DB_PASSWORD: password123
+      DB_NAME: ms1_db
+      FASTAPIPORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+        python schema.py &&
+        uvicorn main_db:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+volumes:
+  mysql_data:
+    driver: local

@@ -1,0 +1,774 @@
+{
+  "info": {
+    "name": "User & Profile Service - Iter2 Tests (Fixed)",
+    "description": "Comprehensive test collection for MS1 Iter2 requirements - Fixed with proper event structure",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Users (201 Created)",
+      "item": [
+        {
+          "name": "POST /users - Create User 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has Location header', function() {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('Extract userId1 from response', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.environment.set('userId1', jsonData.id);",
+                  "    console.log('Saved userId1: ' + jsonData.id);",
+                  "});",
+                  "",
+                  "pm.test('Response has _links', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData._links).to.exist;",
+                  "    pm.expect(jsonData._links.self).to.include('/users/');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kobe Bryant\",\n  \"email\": \"kobe24@example.com\",\n  \"phone\": \"+11234567890\",\n  \"membership_tier\": \"PRO\",\n  \"password\": \"MambaOut_24\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /users - Create User 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Extract userId2 from response', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.environment.set('userId2', jsonData.id);",
+                  "    console.log('Saved userId2: ' + jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"LeBron James\",\n  \"email\": \"lebron23@example.com\",\n  \"phone\": \"+19876543210\",\n  \"membership_tier\": \"PROMAX\",\n  \"password\": \"KingJames_23\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. ETag Tests (304/412)",
+      "item": [
+        {
+          "name": "GET /users/{id} - Get user without ETag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has ETag header', function() {",
+                  "    var etag = pm.response.headers.get('ETag');",
+                  "    pm.expect(etag).to.exist;",
+                  "    pm.environment.set('userETag', etag);",
+                  "    console.log('Saved ETag: ' + etag);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /users/{id} - If-None-Match with matching ETag (304)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{userETag}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 304 Not Modified', function() {",
+                  "    pm.response.to.have.status(304);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users/{id} - If-None-Match with wildcard (304)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "*"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 304 Not Modified', function() {",
+                  "    pm.response.to.have.status(304);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users/{id} - If-None-Match with wrong ETag (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "\"wrong-etag\""
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "PATCH /users/{id} - If-Match with matching ETag (200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "If-Match",
+                "value": "{{userETag}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membership_tier\": \"PROMAX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has new ETag header', function() {",
+                  "    var newETag = pm.response.headers.get('ETag');",
+                  "    pm.expect(newETag).to.exist;",
+                  "    pm.expect(newETag).to.not.equal(pm.environment.get('userETag'));",
+                  "    pm.environment.set('userETag2', newETag);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "PATCH /users/{id} - If-Match with wrong ETag (412)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "If-Match",
+                "value": "\"wrong-etag\""
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membership_tier\": \"FREE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 412 Precondition Failed', function() {",
+                  "    pm.response.to.have.status(412);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Query Parameters Tests",
+      "item": [
+        {
+          "name": "GET /users - Filter by email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?email=kobe24@example.com",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "kobe24@example.com"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response returns filtered results', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.items.length).to.be.at.least(1);",
+                  "    pm.expect(jsonData.items[0].email).to.equal('kobe24@example.com');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users - Filter by membership_tier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?membership_tier=PRO",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "membership_tier",
+                  "value": "PRO"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains query metadata', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.pageSize).to.exist;",
+                  "    pm.expect(jsonData._links).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users - Pagination with pageSize",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?pageSize=5",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination info', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.pageSize).to.equal(5);",
+                  "    pm.expect(jsonData.items.length).to.be.at.most(5);",
+                  "});",
+                  "",
+                  "pm.test('Response has next link if more items', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.total > jsonData.pageSize) {",
+                  "        pm.expect(jsonData._links.next).to.exist;",
+                  "        var nextLink = jsonData._links.next;",
+                  "        var token = nextLink.split('pageToken=')[1];",
+                  "        pm.environment.set('nextPageToken', token);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users - Pagination with pageToken",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?pageSize=5&pageToken={{nextPageToken}}",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                },
+                {
+                  "key": "pageToken",
+                  "value": "{{nextPageToken}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct page info', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.pageToken).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Linked Data Tests",
+      "item": [
+        {
+          "name": "GET /users/{id} - Check _links field",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{userId1}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{userId1}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has _links with self, orders, profile', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData._links).to.exist;",
+                  "    pm.expect(jsonData._links.self).to.include('/users/');",
+                  "    pm.expect(jsonData._links.orders).to.include('/orders?userId=');",
+                  "    pm.expect(jsonData._links.profile).to.include('/profiles?userId=');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /profiles - Check _links in list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/profiles",
+              "host": ["{{base_url}}"],
+              "path": ["profiles"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Pagination response has _links', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData._links).to.exist;",
+                  "    pm.expect(jsonData._links.self).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Create Profiles (201 Created)",
+      "item": [
+        {
+          "name": "POST /profiles - Create Profile for User 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has Location header', function() {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('Extract profileId1 from response', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.environment.set('profileId1', jsonData.id);",
+                  "});",
+                  "",
+                  "pm.test('Response has _links', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData._links).to.exist;",
+                  "    pm.expect(jsonData._links.self).to.include('/profiles/');",
+                  "    pm.expect(jsonData._links.user).to.include('/users/');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId1}}\",\n  \"username\": \"mamba_24\",\n  \"display_name\": \"Black Mamba\",\n  \"avatar_url\": \"https://cdn.example.com/avatars/kobe.png\",\n  \"bio\": \"Love hoops & craftsmanship.\",\n  \"style_tags\": [\"street\", \"minimal\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profiles",
+              "host": ["{{base_url}}"],
+              "path": ["profiles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /profiles - Create Profile for User 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Extract profileId2 from response', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "    pm.environment.set('profileId2', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId2}}\",\n  \"username\": \"king_james\",\n  \"display_name\": \"King James\",\n  \"bio\": \"Fashion forward.\",\n  \"style_tags\": [\"luxury\", \"casual\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profiles",
+              "host": ["{{base_url}}"],
+              "path": ["profiles"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Error Cases",
+      "item": [
+        {
+          "name": "POST /users - Duplicate email (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Another User\",\n  \"email\": \"kobe24@example.com\",\n  \"phone\": \"+15555555555\",\n  \"membership_tier\": \"FREE\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function() {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions email', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail).to.include('Email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET /users/{id} - Not found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/00000000-0000-0000-0000-000000000000",
+              "host": ["{{base_url}}"],
+              "path": ["users", "00000000-0000-0000-0000-000000000000"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', function() {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "POST /profiles - Duplicate username (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId1}}\",\n  \"username\": \"another_username\",\n  \"display_name\": \"Another Person\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/profiles",
+              "host": ["{{base_url}}"],
+              "path": ["profiles"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function() {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Error message mentions profile constraint', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail).to.include('profile');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}
